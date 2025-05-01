@@ -6,21 +6,23 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Cancer Drug Recommender</h1>
+  <div class="container">
+    <h1>Cancer Drug Recommender</h1>
 
-  <label for="cancerType">Select Cancer Type:</label>
-  <select id="cancerType">
-    <option value="lung">Lung</option>
-    <option value="breast">Breast</option>
-    <option value="prostate">Prostate</option>
-  </select>
+    <label for="cancerType">Select Cancer Type:</label>
+    <select id="cancerType">
+      <option value="lung">Lung</option>
+      <option value="breast">Breast</option>
+      <option value="prostate">Prostate</option>
+    </select>
 
-  <label for="geneticFile">Upload Genetic Profile :</label>
-  <input type="file" id="geneticFile" accept=".json,.vcf, .csv, .tsv" />
+    <label for="geneticFile">Upload Genetic Profile:</label>
+    <input type="file" id="geneticFile" accept=".json,.vcf,.csv,.tsv" />
 
-  <button id="submitBtn">Submit</button>
+    <button id="submitBtn">Submit</button>
 
-  <div id="results"></div>
+    <div id="results"></div>
+  </div>
 
   <script src="Scripts/Renderer.js"></script>
 </body>
