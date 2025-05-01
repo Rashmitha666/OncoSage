@@ -3,13 +3,15 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('geneticFile');
     const resultDiv = document.getElementById('results');
   
-    if (!fileInput.files[0]) {
+    if (!fileInput.files[0]) 
+    {
       resultDiv.innerHTML = '<p style="color:red;">Please upload a genetic file.</p>';
       return;
     }
   
     const reader = new FileReader();
-    reader.onload = function () {
+    reader.onload = function () 
+    {
       const fileData = reader.result;
   
       let recommendations = [];
