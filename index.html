@@ -1,11 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>AI Cancer Drug Recommender</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    Hello
+  <h1>Cancer Drug Recommender</h1>
+
+  <label for="cancerType">Select Cancer Type:</label>
+  <select id="cancerType">
+    <option value="lung">Lung</option>
+    <option value="breast">Breast</option>
+    <option value="prostate">Prostate</option>
+  </select>
+
+  <label for="geneticFile">Upload Genetic Profile :</label>
+  <input type="file" id="geneticFile" accept=".json,.vcf, .csv, .tsv" />
+
+  <button id="submitBtn">Submit</button>
+
+  <div id="results"></div>
+
+  <script src="Scripts/Renderer.js"></script>
 </body>
 </html>
