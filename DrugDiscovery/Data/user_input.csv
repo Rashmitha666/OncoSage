@@ -1,0 +1,2 @@
+drug_target,target_pathway,feature_name,n_feature_pos,n_feature_neg,ic50_effect_size,log_ic50_mean_pos,log_ic50_mean_neg,log_max_conc_tested,log_max_conc_tested_2,feature_ic50_t_pval,feature_delta_mean_ic50,feature_pos_ic50_var,feature_neg_ic50_var,feature_pval,tissue_pval,msi_pval,fdr,tissue_type,screening_set
+EGFR,RTK,TP53,12,88,0.47,4.3,6.1,7.0,7.0,0.002,-1.8,0.26,0.31,0.01,0.02,0.03,0.05,lung,GDSC1
