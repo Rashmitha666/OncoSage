@@ -5,11 +5,9 @@
   "scripts": {
     "start": "electron ."
   },
-
-  "type" : "module",
-  
+  "type": "module",
   "devDependencies": {
-    "electron": "^36.0.0"
+    "electron": "^36.4.0"
   },
   "dependencies": {
     "axios": "^1.9.0"
