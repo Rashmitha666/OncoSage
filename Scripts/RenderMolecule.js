@@ -1,5 +1,7 @@
-export async function fetchAndRenderMolecule(drugName) {
-  try {
+export async function fetchAndRenderMolecule(drugName) 
+{
+  try 
+  {
     const sdfRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(drugName)}/SDF`, {
       headers: { 'Content-Type': 'chemical/x-mdl-sdfile' }
     });
@@ -14,7 +16,9 @@ export async function fetchAndRenderMolecule(drugName) {
     viewer.setStyle({}, { stick: {} });
     viewer.zoomTo();
     viewer.render();
-  } catch (err) {
+  } 
+  catch (err) 
+  {
     console.error("Could not fetch or render molecule:", err);
   }
 }
