@@ -40,7 +40,6 @@ document.getElementById('submitBtn').addEventListener('click', async () =>
       if (Array.isArray(data.matched_drug_names) && data.matched_drug_names.length > 0) 
       {
         fetchAndRenderMolecule(data.matched_drug_names[0]);
-        fetchAndRenderMolecule(data.matched_drug_names[1]);
       }
 
     } 
