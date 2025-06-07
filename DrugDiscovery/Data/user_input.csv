@@ -1,0 +1,2 @@
+drug_target,target_pathway,feature_name,n_feature_pos,n_feature_neg,log_ic50_mean_pos,log_ic50_mean_neg,log_max_conc_tested,log_max_conc_tested_2,feature_ic50_t_pval,feature_delta_mean_ic50,feature_pos_ic50_var,feature_neg_ic50_var,feature_pval,tissue_pval,msi_pval,fdr,tissue_type,screening_set
+Microtubule destabiliser,Mitosis,cnaLUAD19,5,46,-2.555475000777649,-2.2758396069605102,,,0.8420700220696803,-0.2796353938171388,2.859595591031983,2.408656433337213,0.8093858151891142,,,26.740112772880977,LUAD,GDSC2

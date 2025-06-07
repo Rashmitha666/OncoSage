@@ -1,1 +1,6 @@
 pandas
+xgboost
+scikit-learn
+joblib
+flask
+seaborn

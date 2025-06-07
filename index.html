@@ -5,6 +5,33 @@
   <title>Redirecting...</title>
 </head>
 <body>
+<<<<<<< HEAD
   <p>Redirecting to login...</p>
+=======
+  <div class="container">
+    <h1>Cancer Drug Recommender</h1>
+
+    <label for="cancerType">Select Cancer Type:</label>
+    <select id="cancerType">
+      <option value="lung">Lung</option>
+      <option value="breast">Breast</option>
+      <option value="prostate">Prostate</option>
+    </select>
+
+    <label for="geneticFile">Upload Genetic Profile:</label>
+    <input type="file" id="geneticFile" accept=".json,.vcf,.csv,.tsv" />
+
+    <button id="submitBtn">Submit</button>
+
+    <div id="results"></div>
+
+    
+    <div id="viewer" style="width: 50px; height: 50px;"></div>
+
+  </div>
+
+  <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+  <script type="module" src="Scripts/Renderer.js"></script>
+>>>>>>> 30f2f47c9e70ea1f06536e4ecf9a1f1a761b30ef
 </body>
 </html>

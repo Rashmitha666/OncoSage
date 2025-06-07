@@ -1,51 +1,58 @@
-document.getElementById('submitBtn').addEventListener('click', async () => {
-    const cancerType = document.getElementById('cancerType').value;
-    const fileInput = document.getElementById('geneticFile');
-    const resultDiv = document.getElementById('results');
-  
-    if (!fileInput.files[0]) 
+import { fetchAndRenderMolecule } from "./RenderMolecule.js";
+
+
+document.getElementById('submitBtn').addEventListener('click', async () => 
+{
+  const cancerType = document.getElementById('cancerType').value;
+  const fileInput = document.getElementById('geneticFile');
+  const resultDiv = document.getElementById('results');
+
+  if (!fileInput.files[0]) 
+  {
+    resultDiv.innerHTML = '<p style="color:red;">Please upload a genetic data file.</p>';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+
+  try 
+  {
+    const response = await fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.predicted_ic50_effect_size !== undefined) 
     {
-      resultDiv.innerHTML = '<p style="color:red;">Please upload a genetic file.</p>';
-      return;
-    }
-  
-    const reader = new FileReader();
-    reader.onload = function () 
-    {
-      const fileData = reader.result;
-  
-      let recommendations = [];
-      switch (cancerType) {
-        case 'lung':
-          recommendations = [
-            { name: 'Afatinib', efficacy: '85%', toxicity: 'Low' },
-            { name: 'Osimertinib', efficacy: '90%', toxicity: 'Moderate' }
-          ];
-          break;
-        case 'breast':
-          recommendations = [
-            { name: 'Tamoxifen', efficacy: '88%', toxicity: 'Low' },
-            { name: 'Trastuzumab', efficacy: '83%', toxicity: 'Moderate' }
-          ];
-          break;
-        case 'prostate':
-          recommendations = [
-            { name: 'Enzalutamide', efficacy: '80%', toxicity: 'Low' },
-            { name: 'Abiraterone', efficacy: '85%', toxicity: 'Moderate' }
-          ];
-          break;
-      }
-  
+      const drugList = Array.isArray(data.matched_drug_names) 
+      ? data.matched_drug_names.join(', ') 
+      : data.matched_drug_names;
+
       resultDiv.innerHTML = `
-        <h3>Recommended Drugs for ${cancerType.charAt(0).toUpperCase() + cancerType.slice(1)} Cancer</h3>
-        <ul>
-          ${recommendations.map(drug =>
-            `<li><strong>${drug.name}</strong> – Efficacy: ${drug.efficacy}, Toxicity: ${drug.toxicity}</li>`
-          ).join('')}
-        </ul>
+        <h3>Predicted IC50 Effect Size for ${cancerType.charAt(0).toUpperCase() + cancerType.slice(1)} Cancer</h3>
+        <p><strong>${data.predicted_ic50_effect_size.toFixed(4)}</strong></p>
+        <p><strong>Matched Drugs:</strong> ${drugList}</p>
       `;
-    };
-  
-    reader.readAsText(fileInput.files[0]);
-  });
-  
+
+      if (Array.isArray(data.matched_drug_names) && data.matched_drug_names.length > 0) 
+      {
+        fetchAndRenderMolecule(data.matched_drug_names[0]);
+        fetchAndRenderMolecule(data.matched_drug_names[1]);
+      }
+
+    } 
+    else 
+    {
+      resultDiv.innerHTML = `<p style="color:red;">❌ ${data.error || 'Prediction failed.'}</p>`;
+    }
+
+  } 
+  catch (err) 
+  {
+    resultDiv.innerHTML = `<p style="color:red;">❌ Failed to connect to prediction service.</p>`;
+    console.error(err);
+  }
+});
