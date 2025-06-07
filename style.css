@@ -1,79 +1,63 @@
-body 
-{
+body {
   font-family: Arial, sans-serif;
-  background-color: #2e2e2e;
-  color: #f0f0f0;
+  background-color: #f7f9fc;
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
 }
 
-.container 
-{
-  background-color: #3c3c3c;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  width: 100%;
-  max-width: 500px;
-  box-sizing: border-box;
-}
-
-h1 
-{
+header {
+  background-color: #0077b6;
+  color: white;
+  padding: 1em;
   text-align: center;
-  margin-bottom: 20px;
-  color: #ffffff;
 }
 
-label 
-{
+main {
+  padding: 20px;
+}
+
+h2 {
+  margin-top: 20px;
+  color: #023e8a;
+}
+
+input, select, button {
   display: block;
-  margin-top: 20px;
-  font-weight: bold;
-}
-
-input[type="file"],
-select 
-{
-  margin-top: 8px;
-  width: 100%;
+  margin-top: 10px;
   padding: 8px;
-  border-radius: 5px;
-  border: none;
-  box-sizing: border-box;
+  width: 100%;
+  max-width: 400px;
 }
 
-button 
-{
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #0078d7;
+button {
+  background-color: #00b4d8;
   color: white;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
-  width: 100%;
 }
 
-button:hover 
-{
-  background-color: #005cbf;
+button:hover {
+  background-color: #0096c7;
 }
 
-#results 
-{
-  margin-top: 30px;
-  background: #1f1f1f;
-  padding: 15px;
+.hidden {
+  display: none;
+}
+
+#recommendations {
+  background-color: #e0f7fa;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #90e0ef;
+}
+
+.login-container {
+  background: white;
+  padding: 30px;
+  max-width: 400px;
+  margin: auto;
+  margin-top: 80px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
-
-ul 
-{
-  padding-left: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  text-align: center;
 }
