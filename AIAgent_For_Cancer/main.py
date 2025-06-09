@@ -9,6 +9,8 @@ import argparse
 from datetime import datetime
 import json
 from typing import Dict, List, Any
+import dotenv
+dotenv.load_dotenv()
 
 # Import agents
 from agents.news_research_agent import NewsResearchAgent
