@@ -85,39 +85,38 @@ app.layout = dbc.Container([
                 ], width=12)
             ])
         ]),
-        dbc.Tab(label="Clinical Trials", tab_id="trials", children=[
+        dbc.Tab(label="Job Recruitments", tab_id="trials", children=[
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
                         dbc.CardHeader([
                             html.I(className="bi bi-search me-2"),
-                            "Clinical Trials Finder"
+                            "Job Recruitment Finder"
                         ]),
                         dbc.CardBody([
                             dbc.Row([
                                 dbc.Col([
-                                    dbc.Label("Cancer Type"),
+                                    dbc.Label("Job Type"),
                                     dcc.Dropdown(
                                         id="cancer-type-dropdown",
                                         options=[
-                                            {"label": "Non-small Cell Lung Cancer (NSCLC)", "value": "nsclc"},
-                                            {"label": "Small Cell Lung Cancer (SCLC)", "value": "sclc"},
-                                            {"label": "All Lung Cancer Types", "value": "all"}
+                                            {"label": "Research Scientist", "value": "research_scientist"},
+                                            {"label": "Clinical Data Manager", "value": "clinical_data_manager"},
+                                            {"label": "All Job Types", "value": "all"}
                                         ],
                                         value="all"
                                     ),
                                 ], md=4),
                                 dbc.Col([
-                                    dbc.Label("Biomarker Status"),
+                                    dbc.Label("Required Skills"),
                                     dcc.Dropdown(
                                         id="biomarker-dropdown",
                                         options=[
-                                            {"label": "EGFR Mutation", "value": "egfr"},
-                                            {"label": "ALK Fusion", "value": "alk"},
-                                            {"label": "ROS1 Fusion", "value": "ros1"},
-                                            {"label": "BRAF Mutation", "value": "braf"},
-                                            {"label": "PD-L1 Expression", "value": "pdl1"},
-                                            {"label": "No Specific Biomarker", "value": "none"}
+                                            {"label": "Bioinformatics", "value": "bioinformatics"},
+                                            {"label": "Clinical Trials", "value": "clinical_trials"},
+                                            {"label": "Data Analysis", "value": "data_analysis"},
+                                            {"label": "Project Management", "value": "project_management"},
+                                            {"label": "No Specific Skill", "value": "none"}
                                         ],
                                         value="none"
                                     ),
@@ -127,13 +126,13 @@ app.layout = dbc.Container([
                                     dbc.Input(id="location-input", type="text", placeholder="e.g., Boston, MA"),
                                 ], md=4),
                             ], className="mb-3"),
-                            dbc.Button("Find Trials", id="find-trials-button", color="primary"),
+                            dbc.Button("Find Jobs", id="find-trials-button", color="primary"),
                         ]),
                     ], className="mb-4"),
                     dbc.Card([
                         dbc.CardHeader([
                             html.I(className="bi bi-list-check me-2"),
-                            "Matching Trials"
+                            "Matching Jobs"
                         ]),
                         dbc.CardBody(html.Div(id="matching-trials")),
                     ]),
@@ -343,7 +342,7 @@ def update_adverse_events(n):
     
     return fig
 
-# Define callback to handle trial search
+# Define callback to handle job search
 @app.callback(
     Output("matching-trials", "children"),
     [Input("find-trials-button", "n_clicks")],
@@ -351,37 +350,33 @@ def update_adverse_events(n):
      dash.dependencies.State("biomarker-dropdown", "value"),
      dash.dependencies.State("location-input", "value")]
 )
-def find_matching_trials(n_clicks, cancer_type, biomarker, location):
-    """Find clinical trials matching the criteria."""
+def find_matching_jobs(n_clicks, job_type, skill, location):
+    """Find job recruitments matching the criteria."""
     if n_clicks is None:
-        return html.P("Enter search criteria and click 'Find Trials'")
-    
-    # In a real implementation, this would call the clinical trials agent
+        return html.P("Enter search criteria and click 'Find Jobs'")
+    # In a real implementation, this would call the job recruitment agent
     # For demonstration, we'll show sample results
     return html.Div([
-        html.P(f"Found 12 trials matching your criteria:"),
-        
+        html.P(f"Found 12 jobs matching your criteria:"),
         html.Div([
-            html.H4("Phase 2 Study of Novel PD-L1 Inhibitor for NSCLC"),
-            html.P("Status: Recruiting"),
-            html.P("Location: Massachusetts General Hospital, Boston, MA (2.5 miles)"),
-            html.P("Eligibility: Stage III/IV NSCLC, PD-L1 positive, no prior immunotherapy"),
-            html.A("View Details", href="#"),
-        ], className="trial-card"),
-        
-        html.Div([
-            html.H4("Combination Therapy with EGFR-TKI and Anti-angiogenic Agent"),
-            html.P("Status: Recruiting"),
+            html.H4("Research Scientist - Oncology"),
+            html.P("Status: Open"),
             html.P("Location: Dana-Farber Cancer Institute, Boston, MA (3.1 miles)"),
-            html.P("Eligibility: EGFR-mutated NSCLC, progression on first-line TKI"),
+            html.P("Skills: Bioinformatics, Clinical Trials, Data Analysis"),
             html.A("View Details", href="#"),
         ], className="trial-card"),
-        
         html.Div([
-            html.H4("Novel ALK Inhibitor for ALK-positive NSCLC"),
-            html.P("Status: Recruiting"),
+            html.H4("Clinical Data Manager"),
+            html.P("Status: Open"),
+            html.P("Location: Massachusetts General Hospital, Boston, MA (2.5 miles)"),
+            html.P("Skills: Data Analysis, Project Management"),
+            html.A("View Details", href="#"),
+        ], className="trial-card"),
+        html.Div([
+            html.H4("Project Manager - Clinical Research"),
+            html.P("Status: Open"),
             html.P("Location: Beth Israel Deaconess Medical Center, Boston, MA (1.8 miles)"),
-            html.P("Eligibility: ALK-positive NSCLC, prior treatment with crizotinib"),
+            html.P("Skills: Project Management, Clinical Trials"),
             html.A("View Details", href="#"),
         ], className="trial-card"),
     ])
