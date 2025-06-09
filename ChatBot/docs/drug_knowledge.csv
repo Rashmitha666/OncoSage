@@ -1,0 +1,4 @@
+Drug,Mutation,Mechanism,SideEffects
+Trametinib,BRAF V600E,Inhibits MEK1/2 to block MAPK signaling,Rash; Diarrhea; Hypertension
+Imatinib,BCR-ABL,Fusion protein kinase inhibitor for leukemia,Nausea; Fatigue; Edema
+Erlotinib,EGFR,Blocks EGFR tyrosine kinase in lung cancer,Rash; Diarrhea; Loss of appetite
