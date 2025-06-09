@@ -402,26 +402,44 @@ class CancerDrugRecommender extends HTMLElement
 
   // Tool Methods
   downloadReport() {
-    if (!this.hasResults) return;
-    
-    // Simulate report generation
-    const reportData = {
-      timestamp: new Date().toISOString(),
-      patient: "Analysis Report",
-      recommendations: "Generated recommendations...",
-      confidence: "High confidence level"
-    };
-    
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `oncology-report-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    this.showNotification("📊 Report downloaded successfully!");
-  }
+  if (!this.hasResults) return;
+
+  const cancerType = this.querySelector("#cancerType").value;
+  const recommendations = this.generateRecommendations(cancerType);
+
+  const reportData = {
+    timestamp: new Date().toISOString(),
+    patientInfo: {
+      cancerType: cancerType || "Unknown"
+    },
+    recommendations: {
+      primaryDrug: recommendations.primaryDrug,
+      mechanism: recommendations.mechanism,
+      combinationTherapy: recommendations.combination,
+      moleculeStructure: recommendations.moleculeSmiles,
+      ic50: recommendations.ic50 || "N/A", // ✅ Include IC₅₀ here
+      confidenceScore: `${(recommendations.confidence * 100).toFixed(2)}%`
+    },
+    notes: [
+      "Monitor for common side effects",
+      "Regular imaging follow-up recommended",
+      "Consider genetic counseling",
+      "Discuss fertility preservation if applicable"
+    ],
+    disclaimer: "Recommendations are based on simulated genetic profile analysis. Clinical decisions should be made by licensed professionals."
+  };
+
+  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `oncology-report-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  this.showNotification("📊 Detailed report downloaded!");
+}
+
 
   exportData() {
     this.showNotification("💾 Analysis data exported!");
