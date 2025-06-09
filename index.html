@@ -1,29 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="refresh" content="0; URL='login.html'" />
   <title>Redirecting...</title>
+  <link rel="stylesheet" href="Styles/variables.css">
+  <link rel="stylesheet" href="Styles/OncoSageDashboard.css">
+
 </head>
 <body>
-  <p>Redirecting to login...</p>
   <div class="container">
-    <h1>Cancer Drug Recommender</h1>
-
-    
-
-    <label for="geneticFile">Upload Genetic Profile:</label>
-    <input type="file" id="geneticFile" accept=".json,.vcf,.csv,.tsv" />
-
-    <button id="submitBtn">Submit</button>
-
-    <div id="results"></div>
-
-    
-    <div id="viewer" style="width: 50px; height: 50px;"></div>
-
+    <oncosage-dashboard></oncosage-dashboard>
   </div>
-
-  <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
-  <script type="module" src="Scripts/Renderer.js"></script>
+    <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+    <script type="module" src="Dashboard/OncoSageDashboard.js"></script>
+    <script type="module" src="Scripts/Renderer.js"></script>
 </body>
 </html>
