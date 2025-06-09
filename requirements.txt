@@ -4,3 +4,6 @@ scikit-learn
 joblib
 flask
 seaborn
+twitter-api-v2==1.15.0
+express==4.18.2
+dotenv==16.3.1
