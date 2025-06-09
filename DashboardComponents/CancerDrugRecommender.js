@@ -91,29 +91,11 @@ class CancerDrugRecommender extends HTMLElement
           <button id="downloadReportBtn">
             📊 Download Detailed Report
           </button>
-          <button id="exportDataBtn">
-            💾 Export Analysis Data
-          </button>
-          <button id="shareResultsBtn">
-            🔗 Share Results
-          </button>
+          
         </div>
       </section>
 
-      <section class="role-based hidden" id="oncologist-tools">
-        <h2>Oncologist Panel</h2>
-        <div class="tool-buttons">
-          <button id="useDrugsBtn">
-            💊 Apply Drug Combination
-          </button>
-          <button id="scheduleFollowupBtn">
-            📅 Schedule Follow-up
-          </button>
-          <button id="patientNotesBtn">
-            📝 Add to Patient Notes
-          </button>
-        </div>
-      </section>
+    
     `;
 
     this.appendChild(container);
@@ -139,11 +121,11 @@ class CancerDrugRecommender extends HTMLElement
 
     // Tool button handlers
     this.querySelector("#downloadReportBtn")?.addEventListener("click", () => this.downloadReport());
-    this.querySelector("#exportDataBtn")?.addEventListener("click", () => this.exportData());
-    this.querySelector("#shareResultsBtn")?.addEventListener("click", () => this.shareResults());
-    this.querySelector("#useDrugsBtn")?.addEventListener("click", () => this.useSuggestedDrugs());
-    this.querySelector("#scheduleFollowupBtn")?.addEventListener("click", () => this.scheduleFollowup());
-    this.querySelector("#patientNotesBtn")?.addEventListener("click", () => this.addToPatientNotes());
+    // this.querySelector("#exportDataBtn")?.addEventListener("click", () => this.exportData());
+    // this.querySelector("#shareResultsBtn")?.addEventListener("click", () => this.shareResults());
+    // this.querySelector("#useDrugsBtn")?.addEventListener("click", () => this.useSuggestedDrugs());
+    // this.querySelector("#scheduleFollowupBtn")?.addEventListener("click", () => this.scheduleFollowup());
+    // this.querySelector("#patientNotesBtn")?.addEventListener("click", () => this.addToPatientNotes());
   }
 
  async handleSubmit() {
@@ -384,7 +366,7 @@ class CancerDrugRecommender extends HTMLElement
 
   showRoleBasedTools() {
     this.querySelector("#researcher-tools").classList.remove("hidden");
-    this.querySelector("#oncologist-tools").classList.remove("hidden");
+    //this.querySelector("#oncologist-tools").classList.remove("hidden");
   }
 
   displayError(message) {
@@ -417,8 +399,7 @@ class CancerDrugRecommender extends HTMLElement
       mechanism: recommendations.mechanism,
       combinationTherapy: recommendations.combination,
       moleculeStructure: recommendations.moleculeSmiles,
-      ic50: recommendations.ic50 || "N/A", // ✅ Include IC₅₀ here
-      confidenceScore: `${(recommendations.confidence * 100).toFixed(2)}%`
+      ic50: recommendations.ic50 || "N/A"
     },
     notes: [
       "Monitor for common side effects",
@@ -441,34 +422,34 @@ class CancerDrugRecommender extends HTMLElement
 }
 
 
-  exportData() {
-    this.showNotification("💾 Analysis data exported!");
-  }
+  // exportData() {
+  //   this.showNotification("💾 Analysis data exported!");
+  // }
 
-  shareResults() {
-    if (navigator.share) {
-      navigator.share({
-        title: 'OncoSage Analysis Results',
-        text: 'Drug recommendation analysis completed',
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      this.showNotification("🔗 Results link copied to clipboard!");
-    }
-  }
+  // shareResults() {
+  //   if (navigator.share) {
+  //     navigator.share({
+  //       title: 'OncoSage Analysis Results',
+  //       text: 'Drug recommendation analysis completed',
+  //       url: window.location.href
+  //     });
+  //   } else {
+  //     navigator.clipboard.writeText(window.location.href);
+  //     this.showNotification("🔗 Results link copied to clipboard!");
+  //   }
+  // }
 
-  useSuggestedDrugs() {
-    this.showNotification("💊 Drug combination added to treatment plan!");
-  }
+  // useSuggestedDrugs() {
+  //   this.showNotification("💊 Drug combination added to treatment plan!");
+  // }
 
-  scheduleFollowup() {
-    this.showNotification("📅 Follow-up appointment scheduled!");
-  }
+  // scheduleFollowup() {
+  //   this.showNotification("📅 Follow-up appointment scheduled!");
+  // }
 
-  addToPatientNotes() {
-    this.showNotification("📝 Analysis added to patient notes!");
-  }
+  // addToPatientNotes() {
+  //   this.showNotification("📝 Analysis added to patient notes!");
+  // }
 
   showNotification(message) {
     const notification = document.createElement('div');

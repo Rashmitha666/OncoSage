@@ -2,3 +2,14 @@ Drug,Mutation,Mechanism,SideEffects
 Trametinib,BRAF V600E,Inhibits MEK1/2 to block MAPK signaling,Rash; Diarrhea; Hypertension
 Imatinib,BCR-ABL,Fusion protein kinase inhibitor for leukemia,Nausea; Fatigue; Edema
 Erlotinib,EGFR,Blocks EGFR tyrosine kinase in lung cancer,Rash; Diarrhea; Loss of appetite
+Mirin,NBS1,Inhibits Mre11-mediated DNA damage response pathway,Unknown
+Camptothecin,TOP1,Topoisomerase I inhibitor; induces DNA damage,Diarrhea; Myelosuppression
+Vinblastine,Unknown,Binds tubulin and inhibits microtubule formation,Nausea; Hair loss; Constipation
+Cisplatin,TP53,Causes DNA cross-linking leading to apoptosis,Nausea; Nephrotoxicity; Ototoxicity
+Cytarabine,Unknown,Inhibits DNA synthesis as a pyrimidine analog,Fever; Rash; Nausea
+Docetaxel,Unknown,Stabilizes microtubules preventing depolymerization,Fluid retention; Fatigue; Hair loss
+Vinorelbine,Unknown,Inhibits mitotic spindle formation via tubulin binding,Neuropathy; Nausea; Fatigue
+Irinotecan,TOP1,Topoisomerase I inhibitor leading to DNA damage,Severe diarrhea; Low white blood cells
+SN-38,TOP1,Active metabolite of Irinotecan; inhibits Topoisomerase I,Diarrhea; Neutropenia
+Topotecan,TOP1,Topoisomerase I inhibitor,Anemia; Nausea; Fatigue
+LMP744,TOP1,Novel indenoisoquinoline Topoisomerase I inhibitor,Myelosuppression; Fatigue

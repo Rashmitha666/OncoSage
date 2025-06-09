@@ -2,7 +2,7 @@ import "../DashboardComponents/NewsCarousel.js";
 import "../DashboardComponents/CancerDrugRecommender.js"; 
 import "../DashboardComponents/VisualizeMutations.js";
 import "../DashboardComponents/LiteratureInsights.js"
-
+import "../DashboardComponents/AIAgentAssistance.js"
 
 class OncoSageDashboard extends HTMLElement {
   constructor() {
@@ -66,8 +66,8 @@ class OncoSageDashboard extends HTMLElement {
       {
         label: "AI Agent Assistance",
         description: "Anaylses the drug from different Sources",
-        componentTag: "three-d-viewer",
-        modulePath: "./ThreeDViewer.js",
+        componentTag: "ai-agent",
+        modulePath: "../DashboardComponents/AIAgentAssistance.js",
         icon: "🔬"
       },
       {
