@@ -10,16 +10,17 @@ const client = new Twitter({
     accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
-// Endpoint to get cancer-related tweets
+// Endpoint to get cancer-related news tweets
 router.get('/api/twitter/cancer-trends', async (req, res) => {
     try {
-        // Search for tweets containing cancer-related keywords
-        const searchQuery = '(cancer OR oncology OR tumor) -is:retweet lang:en';
+        // Search for tweets containing cancer news-related keywords
+        const searchQuery = '(cancer news OR oncology news OR tumor news OR cancer OR oncology OR tumor) -is:retweet lang:en';
         const tweets = await client.v2.search(searchQuery, {
             'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
             'user.fields': ['name', 'username', 'profile_image_url'],
             'expansions': ['author_id'],
             'max_results': 10,
+            // Twitter API v2 recent search returns latest tweets by default
         });
 
         // Format the response
