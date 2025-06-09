@@ -1,4 +1,6 @@
-class CancerDrugRecommender extends HTMLElement {
+import { fetchAndRenderMolecule } from "../Scripts/RenderMolecule.js";
+class CancerDrugRecommender extends HTMLElement 
+{
   constructor() {
     super();
     this.isLoading = false;
@@ -7,14 +9,16 @@ class CancerDrugRecommender extends HTMLElement {
 
   connectedCallback() {
     // Load CSS dependencies
-    if (!document.querySelector('link[href="styles/variables.css"]')) {
+    if (!document.querySelector('link[href="styles/variables.css"]')) 
+    {
       const variablesLink = document.createElement("link");
       variablesLink.rel = "stylesheet";
       variablesLink.href = "styles/variables.css";
       document.head.appendChild(variablesLink);
     }
 
-    if (!document.querySelector('link[href="styles/CancerDrugRecommender.css"]')) {
+    if (!document.querySelector('link[href="styles/CancerDrugRecommender.css"]')) 
+    {
       const styleLink = document.createElement("link");
       styleLink.rel = "stylesheet";
       styleLink.href = "styles/CancerDrugRecommender.css";
@@ -22,7 +26,8 @@ class CancerDrugRecommender extends HTMLElement {
     }
 
     // Load 3Dmol.js for molecular visualization
-    if (!window.$3Dmol) {
+    if (!window.$3Dmol) 
+    {
       const script = document.createElement('script');
       script.src = 'https://3dmol.csb.pitt.edu/build/3Dmol-min.js';
       document.head.appendChild(script);
@@ -141,75 +146,73 @@ class CancerDrugRecommender extends HTMLElement {
     this.querySelector("#patientNotesBtn")?.addEventListener("click", () => this.addToPatientNotes());
   }
 
-  async handleSubmit() {
-    if (this.isLoading) return;
-    
-    this.isLoading = true;
-    const submitBtn = this.querySelector("#submitBtn");
-    const results = this.querySelector("#results");
-    const cancerType = this.querySelector("#cancerType").value;
-    const geneticFile = this.querySelector("#geneticFile").files[0];
+ async handleSubmit() {
+  if (this.isLoading) return;
+  this.isLoading = true;
 
-    // Update button to loading state
-    submitBtn.innerHTML = `
-      <span class="loading-state">Analyzing...</span>
-    `;
-    submitBtn.disabled = true;
+  const submitBtn = this.querySelector("#submitBtn");
+  const results = this.querySelector("#results");
+  const cancerType = this.querySelector("#cancerType").value;
+  const geneticFile = this.querySelector("#geneticFile").files[0];
 
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+  submitBtn.innerHTML = `<span class="loading-state">Analyzing...</span>`;
+  submitBtn.disabled = true;
 
-      // Simulate drug recommendations based on cancer type
-      const recommendations = this.generateRecommendations(cancerType, geneticFile);
-      
-      this.displayResults(recommendations);
-      this.initialize3DViewer(recommendations.primaryDrug);
-      this.showRoleBasedTools();
-      
-      this.hasResults = true;
-
-    } catch (error) {
-      this.displayError("Failed to analyze genetic profile. Please try again.");
-      console.error('Analysis error:', error);
-    } finally {
-      this.isLoading = false;
-      submitBtn.innerHTML = `
-        <span class="button-text">Analyze & Recommend</span>
-        <span class="button-icon">🧬</span>
-      `;
-      submitBtn.disabled = false;
+  try {
+    if (!geneticFile) {
+      this.displayError("Please upload a genetic data file.");
+      return;
     }
-  }
 
-  generateRecommendations(cancerType, geneticFile) {
-    // Simulated recommendations based on cancer type
-    const drugDatabase = {
-      lung: {
-        primaryDrug: 'Osimertinib',
-        moleculeSmiles: 'COc1cc(N(C)CCN(C)C)c2ncnc(Nc3ccc(F)c(Cl)c3)c2c1',
-        combination: ['Osimertinib', 'Carboplatin', 'Pemetrexed'],
-        confidence: 0.92,
-        mechanism: 'EGFR Tyrosine Kinase Inhibitor'
-      },
-      breast: {
-        primaryDrug: 'Trastuzumab',
-        moleculeSmiles: 'CC(C)(C)OC(=O)N1CCC(CC1)c2ccc(cc2)C(=O)Nc3ccc(cc3)S(=O)(=O)N',
-        combination: ['Trastuzumab', 'Docetaxel', 'Carboplatin'],
-        confidence: 0.89,
-        mechanism: 'HER2 Receptor Antagonist'
-      },
-      prostate: {
-        primaryDrug: 'Enzalutamide',
-        moleculeSmiles: 'CC1(C)NC(=O)N(c2ccc(cc2)C(=O)Nc3ccc(C#N)c(c3)C(F)(F)F)C1=O',
-        combination: ['Enzalutamide', 'Docetaxel', 'Prednisone'],
-        confidence: 0.85,
-        mechanism: 'Androgen Receptor Inhibitor'
+    const formData = new FormData();
+    formData.append('file', geneticFile);
+
+    const response = await fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.predicted_ic50_effect_size !== undefined) {
+      // Format the API response for your displayResults method
+      const recommendations = {
+        dosage: data.predicted_ic50_effect_size.toFixed(4), // Or get from API if available
+        primaryDrug: Array.isArray(data.matched_drug_names) && data.matched_drug_names.length > 0
+          ? data.matched_drug_names[0]
+          : 'N/A',
+        combination: data.matched_drug_names || [],
+        mechanism: 'Mechanism info not provided', // Or get from API if available
+      };
+
+      this.displayResults(recommendations);
+
+      // Show 3D structure for the first matched drug
+      if (recommendations.primaryDrug && recommendations.primaryDrug !== 'N/A') {
+        fetchAndRenderMolecule(recommendations.primaryDrug);
       }
-    };
 
-    return drugDatabase[cancerType] || drugDatabase.lung;
+      this.showRoleBasedTools();
+      this.hasResults = true;
+    } else {
+      this.displayError(data.error || "Prediction failed.");
+    }
+  } catch (error) {
+    this.displayError("Failed to connect to prediction service.");
+    console.error(error);
+  } finally {
+    this.isLoading = false;
+    submitBtn.innerHTML = `
+      <span class="button-text">Analyze & Recommend</span>
+      <span class="button-icon">🧬</span>
+    `;
+    submitBtn.disabled = false;
   }
+}
+
+
+
+
 
   displayResults(recommendations) {
     const results = this.querySelector("#results");
@@ -218,7 +221,7 @@ class CancerDrugRecommender extends HTMLElement {
       <div class="results-header">
         <h3>🎯 Drug Recommendations</h3>
         <div class="confidence-badge" style="background: var(--gradient-accent); color: white; padding: 0.5rem 1rem; border-radius: 2rem; font-weight: 600;">
-          ${(recommendations.confidence * 100).toFixed(0)}% Confidence
+          IC50: ${recommendations.dosage} 
         </div>
       </div>
       
@@ -377,57 +380,7 @@ class CancerDrugRecommender extends HTMLElement {
     }
   }
 
-  initialize3DViewer(drugName) {
-    const viewerElement = this.querySelector("#viewer");
-    
-    // Wait for 3Dmol to load
-    const initViewer = () => {
-      if (!window.$3Dmol) {
-        setTimeout(initViewer, 100);
-        return;
-      }
-
-      viewerElement.innerHTML = '';
-      const config = { 
-        backgroundColor: 'rgba(10, 24, 40, 0.9)',
-        antialias: true,
-        cartoonQuality: 10
-      };
-      
-      const viewer = window.$3Dmol.createViewer(viewerElement, config);
-      
-      // Use a sample molecule structure (benzene ring as placeholder)
-      const sampleMolecule = "C1=CC=CC=C1"; // Benzene
-      
-      viewer.addModel(sampleMolecule, "smi");
-      viewer.setStyle({}, { 
-        stick: { 
-          colorscheme: 'greenCarbon',
-          radius: 0.2 
-        },
-        sphere: { 
-          scale: 0.3,
-          colorscheme: 'greenCarbon'
-        }
-      });
-      
-      viewer.zoomTo();
-      viewer.render();
-      viewer.spin(true);
-
-      // Add viewer controls info
-      const controlsInfo = document.createElement('div');
-      controlsInfo.innerHTML = `
-        <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.75rem;">
-          🖱️ Mouse: Rotate • 🔍 Scroll: Zoom • 💊 ${drugName} Structure
-        </div>
-      `;
-      viewerElement.style.position = 'relative';
-      viewerElement.appendChild(controlsInfo);
-    };
-
-    initViewer();
-  }
+  
 
   showRoleBasedTools() {
     this.querySelector("#researcher-tools").classList.remove("hidden");

@@ -1,0 +1,2 @@
+drug_target,target_pathway,feature_name,n_feature_pos,n_feature_neg,log_ic50_mean_pos,log_ic50_mean_neg,log_max_conc_tested,log_max_conc_tested_2,feature_ic50_t_pval,feature_delta_mean_ic50,feature_pos_ic50_var,feature_neg_ic50_var,feature_pval,tissue_pval,msi_pval,fdr,tissue_type,screening_set
+TOP1,DNA replication,ARID1A_mut,4,58,-1.3152822133242483,-1.5822004782612964,,,0.6197977062057185,0.26691826493704807,0.9151958348383152,1.5243852256953332,0.7318529696493657,,,64.45167567868319,LUAD,GDSC2

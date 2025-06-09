@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Genomic Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    .dashboard-box {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+    }
+    h3 {
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+    #tissueInfo {
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
+    }
+
+    #tissueInfo::-webkit-scrollbar {
+    height: 8px;
+    }
+
+    #tissueInfo::-webkit-scrollbar-track {
+    background: transparent;
+    }
+
+    #tissueInfo::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-box">
+    <h3>Upload CSV File</h3>
+    <input type="file" id="csvFile" accept=".csv">
+    <div id="sampleDropdown" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="dashboard-box">
+    <h3>Patient Summary</h3>
+    <div id="summary"></div>
+  </div>
+
+  <div class="dashboard-box">
+    <h3>IC50 Radar Chart</h3>
+    <canvas id="ic50Radar" width="600" height="600"></canvas>
+  </div>
+
+  <div class="dashboard-box">
+    <h3>Mutation Viewer</h3>
+    <div id="mutationViewer" style="width:100%; height:300px;"></div>
+  </div>
+
+  <div class="dashboard-box">
+    <h3>Tissue Information</h3>
+    <div id="tissueInfo" style="display:flex; overflow-x:auto; gap:10px; padding:10px;"></div>
+
+    
+
+
+  </div>
+
+  <div class="dashboard-box">
+    <h3>Download Report</h3>
+    <button onclick="downloadReport()">Download JSON Report</button>
+  </div>
+
+  <script>
+    let parsedData = [];
+
+    document.getElementById("csvFile").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      Papa.parse(file, {
+        header: true,
+        complete: function (results) {
+          parsedData = results.data.filter(r => r.feature_name); // filter invalid
+          if (parsedData.length === 0) return;
+
+          const dropdown = document.createElement("select");
+          dropdown.id = "rowSelect";
+          parsedData.forEach((row, i) => {
+            const option = document.createElement("option");
+            option.value = i;
+            option.text = `Sample ${i + 1} - ${row.tissue_type || "Unknown"}`;
+            dropdown.appendChild(option);
+          });
+
+          const selectDiv = document.getElementById("sampleDropdown");
+          selectDiv.innerHTML = "<strong>Select Sample:</strong><br>";
+          selectDiv.appendChild(dropdown);
+
+          // Initial load
+          loadDashboard(parsedData[0]);
+
+          dropdown.addEventListener("change", (e) => {
+            const row = parsedData[parseInt(e.target.value)];
+            loadDashboard(row);
+          });
+        }
+      });
+    });
+
+    function loadDashboard(row) {
+      // Summary
+      document.getElementById('summary').innerHTML = `
+        <strong>Drug Target:</strong> ${row.drug_target}<br>
+        <strong>Pathway:</strong> ${row.target_pathway}<br>
+        <strong>Feature Name:</strong> ${row.feature_name}<br>
+        <strong>Tissue:</strong> ${row.tissue_type}<br>
+        <strong>Screening Set:</strong> ${row.screening_set}<br>
+      `;
+
+      // Radar Chart
+      const radarCanvas = document.getElementById('ic50Radar');
+      radarCanvas.getContext('2d').clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+      if (Chart.getChart(radarCanvas)) Chart.getChart(radarCanvas).destroy();
+
+      new Chart(radarCanvas, {
+        type: 'radar',
+        data: {
+          labels: [
+            "log_ic50_mean_pos",
+            "log_ic50_mean_neg",
+            "feature_delta_mean_ic50",
+            "feature_pos_ic50_var",
+            "feature_neg_ic50_var"
+          ],
+          datasets: [{
+            label: "IC50 Metrics",
+            data: [
+              parseFloat(row.log_ic50_mean_pos || 0),
+              parseFloat(row.log_ic50_mean_neg || 0),
+              parseFloat(row.feature_delta_mean_ic50 || 0),
+              parseFloat(row.feature_pos_ic50_var || 0),
+              parseFloat(row.feature_neg_ic50_var || 0),
+            ],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            zoom: {
+              pan: { enabled: true, mode: 'xy' },
+              zoom: { wheel: { enabled: true }, mode: 'xy' }
+            }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              angleLines: { color: '#444' },
+              grid: { color: '#444' },
+              pointLabels: { color: '#fff' }
+            }
+          }
+        }
+      });
+
+      // Mutation Viewer
+      const gene = row.feature_name?.match(/[A-Z0-9]+/g)?.[0] || "Unknown";
+      Plotly.newPlot('mutationViewer', [{
+        type: 'scatter',
+        mode: 'markers+text',
+        x: [1],
+        y: [1],
+        marker: { size: 20, color: 'orange' },
+        text: [gene],
+        textposition: 'top center'
+      }], {
+        title: `Mutated Gene: ${gene}`,
+        paper_bgcolor: '#1c1c1c',
+        plot_bgcolor: '#1c1c1c',
+        font: { color: '#fff' },
+        xaxis: { visible: false },
+        yaxis: { visible: false }
+      });
+
+      // Tissue Panel
+      // After setting summary and radar/mutation…
+        const tissueBox = document.getElementById("tissueInfo");
+        const tissueType = (row.tissue_type || "unknown").toUpperCase();
+
+        // List of image filenames, adjust paths if needed
+        const images = [
+        "i1.png",
+        "i2.png",
+        "i3.png",
+        "i1.png",
+        "i2.png",
+        "i3.png",
+        "i4.jpg"
+        ];
+
+        // Clear previous images if any
+        tissueBox.innerHTML = "";
+
+        // Add each image to tissueBox
+        images.forEach((imgFile) => {
+        const img = document.createElement('img');
+        img.src = imgFile;
+        img.alt = `${tissueType} Tissue Image`;
+        img.style = `
+            max-height:150px; 
+            border: 2px solid #555; 
+            border-radius: 10px; 
+            cursor: pointer;
+            flex-shrink: 0;
+        `;
+        tissueBox.appendChild(img);
+        });
+
+
+
+
+    }
+
+    function downloadReport() {
+      const reportData = {
+        generated_at: new Date().toISOString(),
+        content: document.getElementById('summary').innerText
+      };
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'genomic_report.json';
+      a.click();
+    }
+  </script>
+</body>
+</html>

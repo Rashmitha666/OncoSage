@@ -1,5 +1,7 @@
 import "../DashboardComponents/NewsCarousel.js"; 
 import "../DashboardComponents/CancerDrugRecommender.js"; 
+import "../DashboardComponents/VisualizeMutations.js";
+import "../DashboardComponents/LiteratureInsights.js"
 
 
 class OncoSageDashboard extends HTMLElement {
@@ -31,7 +33,7 @@ class OncoSageDashboard extends HTMLElement {
     wrapper.innerHTML = `
       <section id="main-dashboard" class="fade-in">
         <header class="dashboard-header">
-          <h1>&#x1F9EC OncoSage</h1>
+          <h1>OncoSage</h1>
         </header>
 
         <!-- News Carousel Component -->
@@ -62,18 +64,25 @@ class OncoSageDashboard extends HTMLElement {
         icon: "🧬"
       },
       {
-        label: "3D Drug Visualizer",
-        description: "Interactive molecular structure viewer",
+        label: "AI Agent Assistance",
+        description: "Anaylses the drug from different Sources",
         componentTag: "three-d-viewer",
         modulePath: "./ThreeDViewer.js",
         icon: "🔬"
       },
       {
-        label: "Clinical Trial Finder",
-        description: "Find relevant clinical trials",
-        componentTag: "trial-finder",
-        modulePath: "./TrialFinder.js",
-        icon: "🏥"
+        label: "Genomic Dashboard",
+        description: "Upload and visualize patient genomic data",
+        componentTag: "genomic-dashboard",
+        modulePath: "../DashboardComponents/VisualizeMutations.js",
+        icon: "🧬"
+      },
+      {
+      label: "Literature Insights",
+      description: "Latest scientific literature using PubChem ID",
+      componentTag: "literature-insights",
+      modulePath: "../DashboardComponents/LiteratureInsights.js",
+      icon: "📚"
       }
     ];
 
@@ -105,7 +114,8 @@ class OncoSageDashboard extends HTMLElement {
         toolScreen.classList.remove("hidden");
         toolScreen.classList.add("fade-in");
 
-        try {
+        try 
+        {
           // Dynamic import with error handling
           await import(tool.modulePath);
           toolContainer.innerHTML = ""; // Clear loading state

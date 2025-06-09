@@ -1,0 +1,151 @@
+{
+  "system": {
+    "name": "Oncology AI Assistant System",
+    "version": "1.0.0",
+    "data_directory": "data",
+    "log_level": "INFO",
+    "enable_agents": {
+      "news_research": true,
+      "clinical_trials": true,
+      "literature_insight": true,
+      "twitter_trends": true,
+      "drug_safety": true,
+      "voice_assistant": false
+    },
+    "update_interval_minutes": 60
+  },
+  "news_research_agent": {
+    "pubmed": {
+      "search_terms": ["lung cancer", "NSCLC", "SCLC", "lung adenocarcinoma", "lung squamous cell carcinoma"],
+      "max_results": 50,
+      "days_lookback": 30,
+      "api_key": ""
+    },
+    "clinical_trials_gov": {
+      "search_terms": ["lung cancer", "NSCLC", "SCLC"],
+      "max_results": 50,
+      "days_lookback": 30
+    },
+    "journals": [
+      "Journal of Clinical Oncology",
+      "The Lancet Oncology",
+      "Cancer Discovery",
+      "Nature Cancer",
+      "Cancer Cell",
+      "Journal of Thoracic Oncology"
+    ],
+    "update_interval_hours": 24
+  },
+  "clinical_trials_agent": {
+    "api_url": "https://clinicaltrials.gov/api/v2/studies",
+    "search_radius_miles": 100,
+    "max_results": 50,
+    "sort_by": "relevance",
+    "include_recruiting_only": true,
+    "include_not_yet_recruiting": true,
+    "exclude_unknown_status": true,
+    "cache_expiry_hours": 24
+  },
+  "literature_insight_agent": {
+    "max_papers": 10,
+    "summary_length": 500,
+    "extract_sections": ["abstract", "methods", "results", "discussion", "conclusion"],
+    "key_points_count": 5,
+    "clinical_implications_count": 3,
+    "future_directions_count": 3
+  },
+  "twitter_trends_agent": {
+    "api": {
+      "consumer_key": "",
+      "consumer_secret": "",
+      "access_token": "",
+      "access_token_secret": ""
+    },
+    "search_terms": ["#lungcancer", "#NSCLC", "#SCLC", "#oncology", "#cancer"],
+    "verified_accounts": [
+      "ASCO",
+      "theNCI",
+      "LUNGevity",
+      "IASLC",
+      "AmerMedicalAssn",
+      "NEJM",
+      "TheLancet",
+      "JAMA_current"
+    ],
+    "min_engagement": 10,
+    "days_lookback": 7,
+    "update_interval_hours": 6
+  },
+  "drug_safety_agent": {
+    "fda_url": "https://api.fda.gov/drug/event.json",
+    "fda_api_key": "",
+    "ema_url": "https://www.ema.europa.eu/en/medicines/download-medicine-data",
+    "monitored_drugs": [
+      "osimertinib",
+      "erlotinib",
+      "gefitinib",
+      "afatinib",
+      "crizotinib",
+      "alectinib",
+      "brigatinib",
+      "ceritinib",
+      "lorlatinib",
+      "pembrolizumab",
+      "nivolumab",
+      "atezolizumab",
+      "durvalumab",
+      "ipilimumab",
+      "docetaxel",
+      "pemetrexed",
+      "gemcitabine",
+      "vinorelbine",
+      "paclitaxel",
+      "carboplatin",
+      "cisplatin"
+    ],
+    "alert_levels": {
+      "recall": "high",
+      "black_box_warning": "high",
+      "serious_adverse_event": "medium",
+      "adverse_event": "low"
+    },
+    "update_interval_hours": 24
+  },
+  "voice_assistant": {
+    "wake_word": "oncology assistant",
+    "voice_id": "en-US-Neural2-F",
+    "speaking_rate": 1.0,
+    "pitch": 0.0,
+    "volume_gain_db": 0.0,
+    "api_key": ""
+  },
+  "notification": {
+    "methods": ["dashboard", "email"],
+    "email": {
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "username": "",
+      "password": "",
+      "from_address": "oncology.assistant@example.com",
+      "recipients": []
+    },
+    "sms": {
+      "provider": "twilio",
+      "account_sid": "",
+      "auth_token": "",
+      "from_number": "",
+      "recipients": []
+    },
+    "dashboard": {
+      "store_path": "data/notifications"
+    }
+  },
+  "web_dashboard": {
+    "host": "127.0.0.1",
+    "port": 8050,
+    "debug": false,
+    "theme": "light",
+    "refresh_interval_seconds": 60,
+    "max_items_per_section": 10
+  }
+}
