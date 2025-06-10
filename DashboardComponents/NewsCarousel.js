@@ -176,14 +176,14 @@ class NewsCarousel extends HTMLElement {
   }
 
   async fetchNewsData() {
-  const apiKey = "94fd1a42e0134935af8e546f7c896999"; // replace with your actual key
-  const apiUrl = `https://newsapi.org/v2/everything?q=cancer%20drug&language=en&pageSize=5&sortBy=publishedAt&apiKey=${apiKey}`;
+  const proxyUrl = "https://api.allorigins.win/raw?url=";
+  const apiKey = "94fd1a42e0134935af8e546f7c896999";
+  const realUrl = `https://newsapi.org/v2/everything?q=cancer%20drug&language=en&pageSize=5&sortBy=publishedAt&apiKey=${apiKey}`;
 
   try {
-    const response = await fetch(apiUrl);
-    if (!response.ok) throw new Error("Network response was not ok");
+    const response = await fetch(proxyUrl + encodeURIComponent(realUrl));
+    if (!response.ok) throw new Error("Proxy network response was not ok");
     const data = await response.json();
-
     return data.articles.map(article => ({
       title: article.title,
       link: article.url,
@@ -191,11 +191,10 @@ class NewsCarousel extends HTMLElement {
       date: article.publishedAt
     }));
   } catch (error) {
-    console.error("Error fetching news:", error);
+    console.error("Error fetching news (with proxy):", error);
     throw error;
   }
 }
-
 
   render(style, newsData) {
     const container = document.createElement("div");
