@@ -34,6 +34,7 @@ class OncoSageDashboard extends HTMLElement {
       <section id="main-dashboard" class="fade-in">
         <header class="dashboard-header">
           <h1>OncoSage</h1>
+          <h3>Cancer Drug Recommendation System</h3>
         </header>
 
         <!-- News Carousel Component -->

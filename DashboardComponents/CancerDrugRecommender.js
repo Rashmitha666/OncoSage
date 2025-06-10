@@ -1,36 +1,27 @@
-import { fetchAndRenderMolecule } from "../Scripts/RenderMolecule.js";
-class CancerDrugRecommender extends HTMLElement 
-{
+import { fetchAndRenderMolecule } from "../scripts/RenderMolecule.js";
+
+class CancerDrugRecommender extends HTMLElement {
   constructor() {
     super();
     this.isLoading = false;
     this.hasResults = false;
+    this.currentResults = null;
   }
 
   connectedCallback() {
     // Load CSS dependencies
-    if (!document.querySelector('link[href="styles/variables.css"]')) 
-    {
+    if (!document.querySelector('link[href="styles/variables.css"]')) {
       const variablesLink = document.createElement("link");
       variablesLink.rel = "stylesheet";
       variablesLink.href = "styles/variables.css";
       document.head.appendChild(variablesLink);
     }
 
-    if (!document.querySelector('link[href="styles/CancerDrugRecommender.css"]')) 
-    {
+    if (!document.querySelector('link[href="styles/CancerDrugRecommender.css"]')) {
       const styleLink = document.createElement("link");
       styleLink.rel = "stylesheet";
       styleLink.href = "styles/CancerDrugRecommender.css";
       document.head.appendChild(styleLink);
-    }
-
-    // Load 3Dmol.js for molecular visualization
-    if (!window.$3Dmol) 
-    {
-      const script = document.createElement('script');
-      script.src = 'https://3dmol.csb.pitt.edu/build/3Dmol-min.js';
-      document.head.appendChild(script);
     }
 
     this.render();
@@ -85,17 +76,14 @@ class CancerDrugRecommender extends HTMLElement
         </div>
       </div>
 
-      <section class="role-based hidden" id="researcher-tools">
-        <h2>Researcher Tools</h2>
+      <section class="researcher-tools hidden" id="researcher-tools">
+        <h2>Research Tools</h2>
         <div class="tool-buttons">
           <button id="downloadReportBtn">
             📊 Download Detailed Report
           </button>
-          
         </div>
       </section>
-
-    
     `;
 
     this.appendChild(container);
@@ -121,80 +109,91 @@ class CancerDrugRecommender extends HTMLElement
 
     // Tool button handlers
     this.querySelector("#downloadReportBtn")?.addEventListener("click", () => this.downloadReport());
-    // this.querySelector("#exportDataBtn")?.addEventListener("click", () => this.exportData());
-    // this.querySelector("#shareResultsBtn")?.addEventListener("click", () => this.shareResults());
-    // this.querySelector("#useDrugsBtn")?.addEventListener("click", () => this.useSuggestedDrugs());
-    // this.querySelector("#scheduleFollowupBtn")?.addEventListener("click", () => this.scheduleFollowup());
-    // this.querySelector("#patientNotesBtn")?.addEventListener("click", () => this.addToPatientNotes());
   }
 
- async handleSubmit() {
-  if (this.isLoading) return;
-  this.isLoading = true;
+  async handleSubmit() {
+    if (this.isLoading) return;
+    this.isLoading = true;
 
-  const submitBtn = this.querySelector("#submitBtn");
-  const results = this.querySelector("#results");
-  const cancerType = this.querySelector("#cancerType").value;
-  const geneticFile = this.querySelector("#geneticFile").files[0];
+    const submitBtn = this.querySelector("#submitBtn");
+    const results = this.querySelector("#results");
+    const cancerType = this.querySelector("#cancerType").value;
+    const geneticFile = this.querySelector("#geneticFile").files[0];
 
-  submitBtn.innerHTML = `<span class="loading-state">Analyzing...</span>`;
-  submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="loading-state">Analyzing...</span>`;
+    submitBtn.disabled = true;
 
-  try {
-    if (!geneticFile) {
-      this.displayError("Please upload a genetic data file.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', geneticFile);
-
-    const response = await fetch('http://localhost:5000/predict', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.predicted_ic50_effect_size !== undefined) {
-      // Format the API response for your displayResults method
-      const recommendations = {
-        dosage: data.predicted_ic50_effect_size.toFixed(4), // Or get from API if available
-        primaryDrug: Array.isArray(data.matched_drug_names) && data.matched_drug_names.length > 0
-          ? data.matched_drug_names[0]
-          : 'N/A',
-        combination: data.matched_drug_names || [],
-        mechanism: 'Mechanism info not provided', // Or get from API if available
-      };
-
-      this.displayResults(recommendations);
-
-      // Show 3D structure for the first matched drug
-      if (recommendations.primaryDrug && recommendations.primaryDrug !== 'N/A') {
-        fetchAndRenderMolecule(recommendations.primaryDrug);
+    try {
+      if (!geneticFile) {
+        this.displayError("Please upload a genetic data file.");
+        return;
       }
 
-      this.showRoleBasedTools();
-      this.hasResults = true;
-    } else {
-      this.displayError(data.error || "Prediction failed.");
+      // Use Electron's fetch wrapper for CORS handling
+      let response;
+      if (window.electronAPI && window.electronAPI.fetchWithCors) {
+        const formData = new FormData();
+        formData.append('file', geneticFile);
+
+        response = await window.electronAPI.fetchWithCors('http://localhost:5000/predict', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        // Fallback for non-Electron environments
+        const formData = new FormData();
+        formData.append('file', geneticFile);
+
+        response = await fetch('http://localhost:5000/predict', {
+          method: 'POST',
+          body: formData,
+        });
+      }
+
+      const data = await response.json();
+
+      if (response.ok && data.predicted_ic50_effect_size !== undefined) {
+        const recommendations = {
+          dosage: data.predicted_ic50_effect_size.toFixed(4),
+          primaryDrug: Array.isArray(data.matched_drug_names) && data.matched_drug_names.length > 0
+            ? data.matched_drug_names[0]
+            : 'N/A',
+          combination: data.matched_drug_names || [],
+          mechanism: 'Targeted therapy based on genetic profile analysis',
+        };
+
+        this.currentResults = {
+          cancerType,
+          geneticProfile: geneticFile.name,
+          recommendations,
+          timestamp: new Date().toISOString(),
+          analysisData: data
+        };
+
+        this.displayResults(recommendations);
+
+        // Show 3D structure for the first matched drug
+        if (recommendations.primaryDrug && recommendations.primaryDrug !== 'N/A') {
+          fetchAndRenderMolecule(recommendations.primaryDrug);
+        }
+
+        this.showResearchTools();
+        this.hasResults = true;
+      } else {
+        this.displayError(data.error || "Prediction failed.");
+      }
+    } catch (error) {
+      this.displayError("Failed to connect to prediction service. Please ensure the backend server is running.");
+      console.error(error);
+    } finally {
+      this.isLoading = false;
+      submitBtn.innerHTML = `
+        <span class="button-text">Analyze & Recommend</span>
+        <span class="button-icon">🧬</span>
+      `;
+      submitBtn.disabled = false;
     }
-  } catch (error) {
-    this.displayError("Failed to connect to prediction service.");
-    console.error(error);
-  } finally {
-    this.isLoading = false;
-    submitBtn.innerHTML = `
-      <span class="button-text">Analyze & Recommend</span>
-      <span class="button-icon">🧬</span>
-    `;
-    submitBtn.disabled = false;
   }
-}
-
-
-
-
 
   displayResults(recommendations) {
     const results = this.querySelector("#results");
@@ -362,11 +361,8 @@ class CancerDrugRecommender extends HTMLElement
     }
   }
 
-  
-
-  showRoleBasedTools() {
+  showResearchTools() {
     this.querySelector("#researcher-tools").classList.remove("hidden");
-    //this.querySelector("#oncologist-tools").classList.remove("hidden");
   }
 
   displayError(message) {
@@ -375,121 +371,119 @@ class CancerDrugRecommender extends HTMLElement
       <div class="error-state">
         <h3>⚠️ Analysis Error</h3>
         <p>${message}</p>
-        <button onclick="location.reload()" style="margin-top: 1rem;">
-          🔄 Try Again
-        </button>
+        <div class="error-actions">
+          <button class="retry-btn" onclick="location.reload()">
+            🔄 Try Again
+          </button>
+        </div>
       </div>
     `;
   }
 
-  // Tool Methods
-  downloadReport() {
-  if (!this.hasResults) return;
+  async downloadReport() {
+    if (!this.currentResults) {
+      if (window.electronAPI) {
+        await window.electronAPI.showError('No Data', 'No analysis results available to download.');
+      } else {
+        alert('No analysis results available to download.');
+      }
+      return;
+    }
 
-  const cancerType = this.querySelector("#cancerType").value;
-  const recommendations = this.generateRecommendations(cancerType);
+    try {
+      const reportContent = this.generateReportContent();
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `cancer_drug_analysis_${timestamp}.txt`;
 
-  const reportData = {
-    timestamp: new Date().toISOString(),
-    patientInfo: {
-      cancerType: cancerType || "Unknown"
-    },
-    recommendations: {
-      primaryDrug: recommendations.primaryDrug,
-      mechanism: recommendations.mechanism,
-      combinationTherapy: recommendations.combination,
-      moleculeStructure: recommendations.moleculeSmiles,
-      ic50: recommendations.ic50 || "N/A"
-    },
-    notes: [
-      "Monitor for common side effects",
-      "Regular imaging follow-up recommended",
-      "Consider genetic counseling",
-      "Discuss fertility preservation if applicable"
-    ],
-    disclaimer: "Recommendations are based on simulated genetic profile analysis. Clinical decisions should be made by licensed professionals."
-  };
+      if (window.electronAPI && window.electronAPI.downloadFile) {
+        // Use Electron's native file dialog
+        const result = await window.electronAPI.downloadFile({
+          defaultPath: filename,
+          content: reportContent,
+          filters: [
+            { name: 'Text Files', extensions: ['txt'] },
+            { name: 'JSON Files', extensions: ['json'] },
+            { name: 'All Files', extensions: ['*'] }
+          ]
+        });
 
-  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `oncology-report-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+        if (result.success) {
+          await window.electronAPI.showInfo('Download Complete', 
+            `Report saved successfully to: ${result.filePath}`);
+        } else if (!result.canceled) {
+          throw new Error(result.error || 'Download failed');
+        }
+      } else {
+        // Fallback for non-Electron environments
+        const blob = new Blob([reportContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      if (window.electronAPI) {
+        await window.electronAPI.showError('Download Failed', 
+          `Failed to download report: ${error.message}`);
+      } else {
+        alert(`Failed to download report: ${error.message}`);
+      }
+    }
+  }
 
-  this.showNotification("📊 Detailed report downloaded!");
+  generateReportContent() {
+    const { cancerType, geneticProfile, recommendations, timestamp, analysisData } = this.currentResults;
+    
+    return `
+CANCER DRUG ANALYSIS REPORT
+===========================
+
+Analysis Date: ${new Date(timestamp).toLocaleDateString()}
+Cancer Type: ${cancerType}
+Genetic Profile File: ${geneticProfile}
+
+DRUG RECOMMENDATIONS
+===================
+
+Primary Recommendation: ${recommendations.primaryDrug}
+IC50 Effect Size: ${recommendations.dosage}
+Mechanism of Action: ${recommendations.mechanism}
+
+Combination Therapy:
+${recommendations.combination.map(drug => `  - ${drug}`).join('\n')}
+
+TREATMENT CONSIDERATIONS
+=======================
+
+- Monitor for common side effects
+- Regular imaging follow-up recommended
+- Consider genetic counseling
+- Discuss fertility preservation if applicable
+
+IMPORTANT DISCLAIMER
+===================
+
+These recommendations are based on current genetic profile analysis and 
+should be reviewed by a qualified oncologist. Individual patient factors 
+must be considered before making any treatment decisions.
+
+RAW ANALYSIS DATA
+================
+
+${JSON.stringify(analysisData, null, 2)}
+
+Generated by Cancer Drug Research Platform
+For research purposes only.
+    `.trim();
+  }
 }
 
-
-  // exportData() {
-  //   this.showNotification("💾 Analysis data exported!");
-  // }
-
-  // shareResults() {
-  //   if (navigator.share) {
-  //     navigator.share({
-  //       title: 'OncoSage Analysis Results',
-  //       text: 'Drug recommendation analysis completed',
-  //       url: window.location.href
-  //     });
-  //   } else {
-  //     navigator.clipboard.writeText(window.location.href);
-  //     this.showNotification("🔗 Results link copied to clipboard!");
-  //   }
-  // }
-
-  // useSuggestedDrugs() {
-  //   this.showNotification("💊 Drug combination added to treatment plan!");
-  // }
-
-  // scheduleFollowup() {
-  //   this.showNotification("📅 Follow-up appointment scheduled!");
-  // }
-
-  // addToPatientNotes() {
-  //   this.showNotification("📝 Analysis added to patient notes!");
-  // }
-
-  showNotification(message) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--gradient-accent);
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--card-shadow);
-      z-index: var(--z-tooltip);
-      animation: slideInFromRight 0.3s ease-out;
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.style.animation = 'slideOutToRight 0.3s ease-out';
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  }
-}
-
-// Add notification animations
-const notificationStyles = document.createElement('style');
-notificationStyles.textContent = `
-  @keyframes slideInFromRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  
-  @keyframes slideOutToRight {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100%); opacity: 0; }
-  }
-`;
-document.head.appendChild(notificationStyles);
-
+// Register the custom element
 customElements.define("cancer-drug-recommender", CancerDrugRecommender);
+
 export default CancerDrugRecommender;

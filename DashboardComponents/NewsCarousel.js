@@ -43,24 +43,24 @@ class NewsCarousel extends HTMLElement {
       }
       
       .slides {
-        display: flex;
-        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        z-index: 1;
+        display: block;
       }
+
       
       .slide {
-        flex: 0 0 100%;
+        display: none; /* All hidden by default */
         width: 100%;
-        padding: 1.5rem 3rem;
-        text-align: center;
+        box-sizing: border-box;
+        padding: 1.5rem 2rem;
         color: #f8fafc;
         font-size: 1.125rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 1rem;
         min-height: 120px;
-        box-sizing: border-box;
+      }
+
+      .slide.active {
+        display: block;
       }
       
       .news-item {
@@ -176,35 +176,26 @@ class NewsCarousel extends HTMLElement {
   }
 
   async fetchNewsData() {
-    // In a real application, this would fetch from an actual news API
-    // For now, we'll use enhanced sample data
-    return [
-      { 
-        title: "FDA Approves Revolutionary CAR-T Cell Therapy for Rare Blood Cancer",
-        link: "#",
-        category: "Regulatory",
-        date: "2024-01-15"
-      },
-      { 
-        title: "Breakthrough Immunotherapy Shows 89% Response Rate in Phase III Trial",
-        link: "#",
-        category: "Research",
-        date: "2024-01-14"
-      },
-      { 
-        title: "AI-Powered Drug Discovery Platform Identifies Promising Cancer Compounds",
-        link: "#",
-        category: "Technology",
-        date: "2024-01-13"
-      },
-      {
-        title: "New Biomarker Test Improves Early Detection of Pancreatic Cancer",
-        link: "#",
-        category: "Diagnostics",
-        date: "2024-01-12"
-      }
-    ];
+  const apiKey = "94fd1a42e0134935af8e546f7c896999"; // replace with your actual key
+  const apiUrl = `https://newsapi.org/v2/everything?q=cancer%20drug&language=en&pageSize=5&sortBy=publishedAt&apiKey=${apiKey}`;
+
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error("Network response was not ok");
+    const data = await response.json();
+
+    return data.articles.map(article => ({
+      title: article.title,
+      link: article.url,
+      category: article.source.name || "News",
+      date: article.publishedAt
+    }));
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    throw error;
   }
+}
+
 
   render(style, newsData) {
     const container = document.createElement("div");
@@ -276,6 +267,10 @@ class NewsCarousel extends HTMLElement {
     this.dotsElement = dotsContainer;
     this.playPauseElement = playPauseBtn;
     this.totalSlides = newsData.length;
+
+    console.log("Total slides:", this.totalSlides);
+console.log("Actual .slide elements:", this.slidesElement.children.length);
+
   }
 
   renderError() {
@@ -403,24 +398,18 @@ class NewsCarousel extends HTMLElement {
   }
 
   updateCarousel() {
-    // Update slide position - fix the calculation
-    const translateX = -this.currentIndex * 100;
-    this.slidesElement.style.transform = `translateX(${translateX}%)`;
+  const slides = this.slidesElement.children;
 
-    // Update dots
-    this.shadowRoot.querySelectorAll('.dot').forEach((dot, index) => {
-      dot.classList.toggle('active', index === this.currentIndex);
-    });
+  Array.from(slides).forEach((slide, index) => {
+    slide.style.display = index === this.currentIndex ? "block" : "none";
+  });
 
-    // Add slide change animation
-    const currentSlide = this.shadowRoot.querySelector(`[data-index="${this.currentIndex}"]`);
-    if (currentSlide) {
-      currentSlide.style.animation = 'slideIn 0.5s ease-out';
-      setTimeout(() => {
-        currentSlide.style.animation = '';
-      }, 500);
-    }
-  }
+  this.shadowRoot.querySelectorAll('.dot').forEach((dot, index) => {
+    dot.classList.toggle('active', index === this.currentIndex);
+  });
+}
+
+
 
   startAutoPlay() {
     if (this.autoPlayTimer) clearInterval(this.autoPlayTimer);
@@ -428,7 +417,7 @@ class NewsCarousel extends HTMLElement {
       if (this.isAutoPlaying) {
         this.goToNext();
       }
-    }, 5000);
+    }, 10000);
   }
 
   pauseAutoPlay() {
